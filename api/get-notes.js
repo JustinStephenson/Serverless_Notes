@@ -1,5 +1,5 @@
 /**
- * Route: DELETE /note/t/{timestamp}
+ * Route: GET /notes
  */
 
 import AWS from 'aws-sdk';
@@ -10,20 +10,35 @@ const tableName = process.env.NOTES_TABLE;
 
 export const handler = async (event) => {
 	try {
-		let timestamp = parseInt(event.pathParameters.timestamp);
+		let query = event.queryStringParameters;
+		let limit = query && query.limit ? parseInt(query.limit) : 5;
+		let user_id = getUserId(event.headers);
+
 		let params = {
 			TableName: tableName,
-			Key: {
-				user_id: getUserId(event.headers),
-				timestamp: timestamp,
+			KeyConditionExpression: 'user_id = :uid',
+			ExpressionAttributeValues: {
+				':uid': user_id,
 			},
+			Limit: limit,
+			ScanIndexForward: false,
 		};
 
-		await dynamoDb.delete(params).promise();
+		let startTimestamp = query && query.start ? parseInt(query.start) : 0;
+
+		if (startTimestamp > 0) {
+			params.ExclusiveStartKey = {
+				user_id: user_id,
+				timestamp: startTimestamp,
+			};
+		}
+
+		let data = await dynamoDb.query(params).promise();
 
 		return {
 			statusCode: 200,
 			headers: getResponseHeaders(),
+			body: JSON.stringify(data),
 		};
 	} catch (err) {
 		console.log('Error', err);
