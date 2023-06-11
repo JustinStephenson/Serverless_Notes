@@ -1,5 +1,11 @@
 service: sls-notes-backend
 
+package:
+  individually: true
+  exclude:
+    - .git/**
+    - node_modules/**
+
 frameworkVersion: "3"
 
 plugins:
