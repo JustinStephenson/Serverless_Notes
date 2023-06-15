@@ -2,13 +2,26 @@
  * Route: GET /notes
  */
 
-import AWS from 'aws-sdk';
-import { getResponseHeaders, getUserId } from './util.js';
+const AWS = require('aws-sdk');
+
+const getUserId = (headers) => {
+	return headers.app_user_id;
+};
+
+const getUserName = (headers) => {
+	return headers.app_user_name;
+};
+
+const getResponseHeaders = () => {
+	return {
+		'Access-Control-Allow-Origin': '*',
+	};
+};
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.NOTES_TABLE;
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
 	try {
 		let query = event.queryStringParameters;
 		let limit = query && query.limit ? parseInt(query.limit) : 5;
