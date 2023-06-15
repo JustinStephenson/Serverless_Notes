@@ -18,6 +18,12 @@ custom:
     - Content-Length
     - app_user_id
     - app_user_name
+  customDomain:
+    domainName: api.notesapp.j
+    basePath: 'v1'
+    stage: ${self:provider.stage}
+    certificateName: notesapp.j
+    createRoute53Record: true
 
 provider:
   name: aws
